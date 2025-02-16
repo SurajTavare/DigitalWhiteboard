@@ -305,7 +305,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
             
             <div className="space-y-4 overflow-y-auto custom-scrollbar">
               <div>
-                <h3 className="font-medium mb-2">Flowchart</h3>
+                <h3 className="font-medium mb-2">*Flowchart</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
                   {`graph TD
     A[Start] --> B{Is it?}
@@ -314,10 +314,22 @@ const Toolbar: React.FC<ToolbarProps> = ({
     D --> B
     B ---->|No| E[End]`}
                 </pre>
+                <br></br>
+                <br></br>
+                <pre>
+                {`explanation:-
+• TD indicates Top-Down direction
+• A[Start] creates a node with text "Start"
+• --> creates an arrow connection
+• {Decision?} creates a diamond shape
+• |Yes| adds text to the arrow`}
+                </pre>
               </div>
-
+              <br></br>
+              <br></br>
+              <br></br>
               <div>
-                <h3 className="font-medium mb-2">Sequence Diagram</h3>
+                <h3 className="font-medium mb-2">*Sequence Diagram</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
                   {`sequenceDiagram
     participant Alice
@@ -331,10 +343,24 @@ const Toolbar: React.FC<ToolbarProps> = ({
     John->>Bob: How about you?
     Bob-->>John: Jolly good!`}
                 </pre>
+                <br></br>
+                <br></br>
+                <pre>
+                {`explanation: 
+• participant defines an actor
+• ->> creates a solid arrow
+• -->> creates a dashed arrow
+• : adds message text`
+    }
+                </pre>
               </div>
+              <br></br>
+              <br></br>
+              <br></br>
+
 
               <div>
-                <h3 className="font-medium mb-2">Class Diagram</h3>
+                <h3 className="font-medium mb-2">*Class Diagram</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
                   {`classDiagram
     Animal <|-- Duck
@@ -350,20 +376,44 @@ const Toolbar: React.FC<ToolbarProps> = ({
       +quack()
     }`}
                 </pre>
+                <br></br>
+                <br></br>
+                <pre>
+                {`explanation: 
+• class defines a new class
+• + indicates public members
+• <|-- shows inheritance
+• () indicates methods`}
+                </pre>
               </div>
+              <br></br>
+              <br></br>
+              <br></br>
 
               <div>
-                <h3 className="font-medium mb-2">Entity Relationship Diagram</h3>
+                <h3 className="font-medium mb-2">*Entity Relationship Diagram</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
                   {`erDiagram
     CUSTOMER ||--o{ ORDER : places
     ORDER ||--|{ LINE-ITEM : contains
     CUSTOMER }|..|{ DELIVERY-ADDRESS : uses`}
                 </pre>
+                <br></br>
+                <br></br>
+                <pre>
+                  {`explanation: 
+• ||--o{ shows one-to-many relationship
+• ||--|| shows one-to-one relationship
+• }|--|{ shows many-to-many
+• : adds relationship label`}
+                </pre>
               </div>
+              <br></br>
+              <br></br>
+              <br></br>
 
               <div>
-                <h3 className="font-medium mb-2">State Diagram</h3>
+                <h3 className="font-medium mb-2">*State Diagram</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
                   {`stateDiagram-v2
     [*] --> Still
@@ -373,20 +423,54 @@ const Toolbar: React.FC<ToolbarProps> = ({
     Moving --> Crash
     Crash --> [*]`}
                 </pre>
+                <br></br>
+                <br></br>
+                <pre>
+                  {` explanation: 
+• [*] represents start/end state
+• --> creates transitions
+• : adds transition label`}
+                </pre>
               </div>
+                    <br></br>
+                    <br></br>
+                    <br></br>
 
               <div>
-                <h3 className="font-medium mb-2">Gantt Chart</h3>
+                <h3 className="font-medium mb-2">*Gantt Chart</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
-                  {`gantt
-    title A Gantt Diagram
-    dateFormat  YYYY-MM-DD
-    section Section
-    A task           :a1, 2014-01-01, 30d
-    Another task     :after a1  , 20d
-    section Another
-    Task in sec      :2014-01-12  , 12d
-    another task      : 24d`}
+                  {` gantt
+    title Project Schedule
+    dateFormat YYYY-MM-DD
+    
+    section Planning
+    Requirements    :a1, 2024-03-01, 7d
+    Design         :after a1, 10d
+    
+    section Development
+    Frontend       :2024-03-15, 14d
+    Backend        :2024-03-20, 10d
+    
+    section Testing
+    Integration    :2024-04-01, 7d
+    User Testing   :2024-04-08, 5d
+    
+    section Deployment
+    Release        :milestone, 2024-04-15, 1d`}
+                </pre>
+                <br></br>
+                <br></br>
+                <pre>
+                  {`explanation: 
+• dateFormat sets the date display format
+• section groups related tasks
+• task :id, start_date, duration
+• after taskId sets dependency
+• duration format: Nd (N days)
+• milestone marks important points
+• title sets chart title
+• Supports parallel tasks
+• Can use dates or dependencies`}
                 </pre>
               </div>
             </div>
