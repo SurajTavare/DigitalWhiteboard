@@ -21,12 +21,13 @@ const ViewOnlyToolbar: React.FC<ViewOnlyToolbarProps> = ({ onExport }) => {
   }, []);
 
   return (
-    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-lg z-20 border border-gray-200">
+    <div className="fixed top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-lg z-20 border border-gray-200">
       <div className="relative" ref={exportRef}>
         <button 
           onClick={() => setIsExportOpen(!isExportOpen)} 
           className="p-2 hover:bg-gray-50 rounded-lg flex items-center gap-2 transition-all"
           title="Export Diagram"
+          aria-expanded={isExportOpen ? 'true' : 'false'}
         >
           <Download className="w-5 h-5" />
         </button>

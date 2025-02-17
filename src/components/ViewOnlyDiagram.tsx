@@ -23,17 +23,85 @@ const ViewOnlyDiagram: React.FC<ViewOnlyDiagramProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const calculateBoundingBox = () => {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    // Check shapes
+    shapes.forEach(shape => {
+      const width = shape.width || (shape.type === 'text' ? 200 : 128);
+      const height = shape.height || (shape.type === 'text' ? 100 : shape.type === 'rectangle' ? 80 : 128);
+
+      minX = Math.min(minX, shape.position.x);
+      minY = Math.min(minY, shape.position.y);
+      maxX = Math.max(maxX, shape.position.x + width);
+      maxY = Math.max(maxY, shape.position.y + height);
+
+      // For lines, check endPoint
+      if (shape.type === 'line' && shape.endPoint) {
+        minX = Math.min(minX, shape.endPoint.x);
+        minY = Math.min(minY, shape.endPoint.y);
+        maxX = Math.max(maxX, shape.endPoint.x);
+        maxY = Math.max(maxY, shape.endPoint.y);
+      }
+    });
+
+    // Check drawings
+    drawings.forEach(drawing => {
+      drawing.points.forEach(point => {
+        minX = Math.min(minX, point.x);
+        minY = Math.min(minY, point.y);
+        maxX = Math.max(maxX, point.x);
+        maxY = Math.max(maxY, point.y);
+      });
+    });
+
+    // Add padding
+    const padding = 50;
+    return {
+      x: Math.max(0, minX - padding),
+      y: Math.max(0, minY - padding),
+      width: Math.min(maxX - minX + padding * 2, 5000),
+      height: Math.min(maxY - minY + padding * 2, 5000)
+    };
+  };
+
   const handleExport = async (type: 'png' | 'pdf') => {
     if (!containerRef.current) return;
 
     try {
-      const canvas = await html2canvas(containerRef.current, {
-        backgroundColor,
+      const boundingBox = calculateBoundingBox();
+      
+      // Create a temporary container for export
+      const exportContainer = containerRef.current.cloneNode(true) as HTMLElement;
+      
+      // Position the container to show only the diagram area
+      exportContainer.style.backgroundColor = backgroundColor;
+      exportContainer.style.width = `${boundingBox.width}px`;
+      exportContainer.style.height = `${boundingBox.height}px`;
+      exportContainer.style.position = 'fixed';
+      exportContainer.style.top = '0';
+      exportContainer.style.left = '0';
+      exportContainer.style.zIndex = '-1000';
+      exportContainer.style.transform = `translate(${-boundingBox.x}px, ${-boundingBox.y}px)`;
+      exportContainer.style.overflow = 'hidden';
+      document.body.appendChild(exportContainer);
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(exportContainer, {
+        backgroundColor: backgroundColor,
         scale: 2,
         useCORS: true,
         logging: false,
         allowTaint: true,
-        foreignObjectRendering: true
+        foreignObjectRendering: true,
+        width: boundingBox.width,
+        height: boundingBox.height,
+        x: boundingBox.x,
+        y: boundingBox.y
       });
 
       if (type === 'png') {
@@ -55,6 +123,8 @@ const ViewOnlyDiagram: React.FC<ViewOnlyDiagramProps> = ({
         pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height);
         pdf.save('diagram.pdf');
       }
+
+      document.body.removeChild(exportContainer);
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export diagram. Please try again.');

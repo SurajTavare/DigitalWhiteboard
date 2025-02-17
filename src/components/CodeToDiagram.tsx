@@ -19,7 +19,7 @@ const CodeToDiagram: React.FC<CodeToDiagramProps> = ({ onClose }) => {
       startOnLoad: true,
       theme: 'default',
       securityLevel: 'loose',
-      fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+      fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     });
   }, []);
 
@@ -114,16 +114,16 @@ const CodeToDiagram: React.FC<CodeToDiagramProps> = ({ onClose }) => {
 
           <div className="flex flex-col">
             <div className="text-sm font-medium text-gray-700 mb-2">Preview</div>
-            <div className="flex-1 bg-gray-50 rounded-lg p-4 overflow-auto">
+            <div className="flex-1 bg-gray-50 rounded-lg p-4 overflow-auto max-h-[400px]"> {/* Decreased max-height */}
               {error ? (
                 <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
                   {error}
                 </div>
               ) : svg ? (
-                <div 
+                <div
                   ref={diagramRef}
                   className="bg-white p-4 rounded-lg shadow-sm"
-                  dangerouslySetInnerHTML={{ __html: svg }} 
+                  dangerouslySetInnerHTML={{ __html: svg }}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center text-gray-400">
@@ -134,7 +134,8 @@ const CodeToDiagram: React.FC<CodeToDiagramProps> = ({ onClose }) => {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 mt-4 pt-4 border-t">
+        {/* Fixed buttons at the bottom */}
+        <div className="mt-auto flex justify-end gap-3 mt-4 pt-4 border-t pb-10"> {/* Added padding to bottom */}
           <button
             onClick={onClose}
             className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"

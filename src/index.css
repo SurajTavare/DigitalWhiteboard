@@ -4,21 +4,23 @@
 
 /* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 12px;
+  height: 12px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f5f9;
+  border-radius: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: #94a3b8;
+  border-radius: 6px;
+  border: 3px solid #f1f5f9;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #64748b;
 }
 
 /* Hide scrollbar for toolbar */
@@ -32,49 +34,64 @@
 }
 
 /* Custom vertical scrollbar for the main container */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
 }
 
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: transparent;
+.overflow-y-auto::-webkit-scrollbar-track,
+.overflow-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
 }
 
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+.overflow-y-auto::-webkit-scrollbar-thumb,
+.overflow-auto::-webkit-scrollbar-thumb {
   background: #94a3b8;
+  border-radius: 6px;
+  border: 3px solid #f1f5f9;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover,
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 /* Main canvas scrollbars */
 .diagram-canvas {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: #94a3b8 #f1f5f9;
+  width: 5000px;
+  height: 5000px;
+  min-width: 100%;
+  min-height: 100%;
+   overflow: auto; /* Ensures scrollbars are activated */
 }
 
 .diagram-canvas::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
 }
 
 .diagram-canvas::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f5f9;
+  border-radius: 6px;
 }
 
 .diagram-canvas::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: #94a3b8;
+  border-radius: 6px;
+  border: 3px solid #f1f5f9;
 }
 
 .diagram-canvas::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #64748b;
 }
 
 .diagram-canvas::-webkit-scrollbar-corner {
-  background: transparent;
+  background: #f1f5f9;
+  border-radius: 6px;
 }
 
 /* Mermaid diagram styles */

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Square, Circle, Diamond, Link as Line, Trash2, Pen, Download, Type, Eraser, PaintBucket, X, FileText, Sparkles, Code, HelpCircle, Trash } from 'lucide-react';
 import FileViewer from './FileViewer';
-import DiagramSuggestions from './DiagramSuggestions';
+// import DiagramSuggestions from './DiagramSuggestions';
 import CodeToDiagram from './CodeToDiagram';
 import { DiagramSuggestion } from '../types';
 
@@ -17,7 +17,7 @@ interface ToolbarProps {
   isEraserActive: boolean;
   onToggleBackgroundColorPicker: () => void;
   onShowTip: (tip: string) => void;
-  onApplySuggestion: (suggestion: DiagramSuggestion) => void;
+  // onApplySuggestion: (suggestion: DiagramSuggestion) => void;
   onClearScreen: () => void;
 }
 
@@ -33,7 +33,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   isEraserActive,
   onToggleBackgroundColorPicker,
   onShowTip,
-  onApplySuggestion,
+  // onApplySuggestion,
   onClearScreen
 }) => {
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -110,14 +110,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
     <>
       <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg z-20 border border-gray-200">
         <div className="p-3 space-y-2">
-          <button
+          {/* <button
             onClick={() => setShowSuggestions(true)}
             className="w-full p-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity mb-2"
             title="Get AI Suggestions"
           >
             <Sparkles className="w-5 h-5" />
             <span className="text-sm">AI Suggest</span>
-          </button>
+          </button> */}
 
           <div className="grid grid-cols-2 gap-2 p-1 bg-gray-50 rounded-lg mb-2">
             <button 
@@ -273,7 +273,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         </button>
       </div>
 
-      {showSuggestions && (
+      {/* {showSuggestions && (
         <DiagramSuggestions
           onClose={() => setShowSuggestions(false)}
           onSelect={(suggestion) => {
@@ -281,7 +281,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
             setShowSuggestions(false);
           }}
         />
-      )}
+      )} */}
 
       {selectedFile && (
         <FileViewer

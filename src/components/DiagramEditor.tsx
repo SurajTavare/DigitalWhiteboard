@@ -1,18 +1,16 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Undo2, Redo2, Save, Upload, Share2, X, Info } from 'lucide-react';
-import { Shape, Connection, DiagramState, HistoryAction, ShapeType, DrawingPath, LineStyle, ArrowStyle, DiagramSuggestion } from '../types';
+import { Undo2, Redo2, Save, Upload, Share2, X } from 'lucide-react';
+import { Shape, Connection, DiagramState, HistoryAction, ShapeType, DrawingPath, LineStyle, ArrowStyle } from '../types';
 import ShapeComponent from './Shape';
 import ConnectionComponent from './Connection';
 import DrawingCanvas from './DrawingCanvas';
 import Toolbar from './Toolbar';
 import BackgroundColorPicker from './BackgroundColorPicker';
 import ShareDialog from './ShareDialog';
-import ExplanationPanel from './ExplanationPanel';
 import { supabase } from '../lib/supabase';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { v4 as uuidv4 } from 'uuid';
-import CodeToDiagram from './CodeToDiagram';
 
 interface DiagramEditorProps {
   diagramId?: string;
@@ -50,8 +48,6 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
   const tipTimeoutRef = useRef<number | null>(null);
   const [user, setUser] = useState<any>(null);
   const [showAuthMessage, setShowAuthMessage] = useState(false);
-  const [showExplanation, setShowExplanation] = useState(true);
-  const [activeDiagramInfo, setActiveDiagramInfo] = useState<DiagramSuggestion | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -274,21 +270,72 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
     }
   }, [drawingHistory, drawingHistoryIndex]);
 
+  const calculateBoundingBox = () => {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    // Check shapes
+    shapes.forEach(shape => {
+      const width = shape.width || (shape.type === 'text' ? 200 : 128);
+      const height = shape.height || (shape.type === 'text' ? 100 : shape.type === 'rectangle' ? 80 : 128);
+
+      minX = Math.min(minX, shape.position.x);
+      minY = Math.min(minY, shape.position.y);
+      maxX = Math.max(maxX, shape.position.x + width);
+      maxY = Math.max(maxY, shape.position.y + height);
+
+      // For lines, check endPoint
+      if (shape.type === 'line' && shape.endPoint) {
+        minX = Math.min(minX, shape.endPoint.x);
+        minY = Math.min(minY, shape.endPoint.y);
+        maxX = Math.max(maxX, shape.endPoint.x);
+        maxY = Math.max(maxY, shape.endPoint.y);
+      }
+    });
+
+    // Check drawings
+    drawings.forEach(drawing => {
+      drawing.points.forEach(point => {
+        minX = Math.min(minX, point.x);
+        minY = Math.min(minY, point.y);
+        maxX = Math.max(maxX, point.x);
+        maxY = Math.max(maxY, point.y);
+      });
+    });
+
+    // Add padding
+    const padding = 50;
+    return {
+      x: Math.max(0, minX - padding),
+      y: Math.max(0, minY - padding),
+      width: Math.min(maxX - minX + padding * 2, 5000),
+      height: Math.min(maxY - minY + padding * 2, 5000)
+    };
+  };
+
   const handleExport = async (type: 'png' | 'pdf') => {
     if (!containerRef.current) return;
 
     try {
+      const boundingBox = calculateBoundingBox();
+      
+      // Create a temporary container for export
       const exportContainer = containerRef.current.cloneNode(true) as HTMLElement;
       const toolbar = exportContainer.querySelector('[class*="absolute top-4 left-4"]');
       if (toolbar) toolbar.remove();
 
+      // Position the container to show only the diagram area
       exportContainer.style.backgroundColor = backgroundColor;
-      exportContainer.style.width = `${containerRef.current.offsetWidth}px`;
-      exportContainer.style.height = `${containerRef.current.offsetHeight}px`;
+      exportContainer.style.width = `${boundingBox.width}px`;
+      exportContainer.style.height = `${boundingBox.height}px`;
       exportContainer.style.position = 'fixed';
       exportContainer.style.top = '0';
       exportContainer.style.left = '0';
       exportContainer.style.zIndex = '-1000';
+      exportContainer.style.transform = `translate(${-boundingBox.x}px, ${-boundingBox.y}px)`;
+      exportContainer.style.overflow = 'hidden';
       document.body.appendChild(exportContainer);
 
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -299,7 +346,11 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
         useCORS: true,
         logging: false,
         allowTaint: true,
-        foreignObjectRendering: true
+        foreignObjectRendering: true,
+        width: boundingBox.width,
+        height: boundingBox.height,
+        x: boundingBox.x,
+        y: boundingBox.y
       });
 
       if (type === 'png') {
@@ -563,55 +614,6 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
     reader.readAsText(file);
   };
 
-  const handleApplySuggestion = (suggestion: DiagramSuggestion) => {
-    setShapes([]);
-    setConnections([]);
-    
-    const newShapes = suggestion.elements.map(shape => ({
-      ...shape,
-      id: `shape-${Date.now()}-${Math.random()}`,
-      position: {
-        x: shape.position.x + (Math.random() * 20 - 10),
-        y: shape.position.y + (Math.random() * 20 - 10)
-      }
-    }));
-
-    const shapeIdMap = new Map();
-    suggestion.elements.forEach((oldShape, index) => {
-      shapeIdMap.set(oldShape.id, newShapes[index].id);
-    });
-
-    const newConnections = suggestion.connections.map(conn => ({
-      ...conn,
-      id: `conn-${Date.now()}-${Math.random()}`,
-      from: shapeIdMap.get(conn.from),
-      to: shapeIdMap.get(conn.to),
-      lineStyle: 'solid'
-    }));
-
-    setShapes(newShapes);
-    setConnections(newConnections);
-    setActiveDiagramInfo(suggestion);
-  };
-
-  const handleCodeToDiagram = (newShapes: Shape[], newConnections: Connection[]) => {
-    setShapes(prev => [...prev, ...newShapes]);
-    setConnections(prev => [...prev, ...newConnections]);
-    
-    addToHistory({
-      type: 'ADD_MULTIPLE',
-      data: { shapes: newShapes, connections: newConnections },
-      undo: () => {
-        setShapes(prev => prev.filter(s => !newShapes.includes(s)));
-        setConnections(prev => prev.filter(c => !newConnections.includes(c)));
-      },
-      redo: () => {
-        setShapes(prev => [...prev, ...newShapes]);
-        setConnections(prev => [...prev, ...newConnections]);
-      }
-    });
-  };
-
   const handleClearScreen = () => {
     setShapes([]);
     setConnections([]);
@@ -635,7 +637,7 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
   };
 
   return (
-    <div className="w-full h-screen bg-gray-100 flex flex-col">
+    <div className="w-full h-screen bg-gray-100 flex flex-col overflow-hidden">
       <div className="bg-white p-4 shadow-md flex gap-4">
         <button
           onClick={undo}
@@ -678,10 +680,10 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
         </button>
       </div>
       
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 relative overflow-auto">
         <div
           ref={containerRef}
-          className={`relative diagram-canvas overflow-auto transition-all ${showExplanation ? 'flex-1' : 'w-full'}`}
+          className="absolute inset-0 diagram-canvas"
           style={{ backgroundColor }}
           onClick={() => {
             setSelectedShape(null);
@@ -722,8 +724,6 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
             isEraserActive={isEraserActive}
             onToggleBackgroundColorPicker={toggleBackgroundColorPicker}
             onShowTip={showFeatureTip}
-            onApplySuggestion={handleApplySuggestion}
-            onCodeToDiagram={handleCodeToDiagram}
             onClearScreen={handleClearScreen}
           />
 
@@ -779,22 +779,7 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
               onClose={() => setShowShareDialog(false)}
             />
           )}
-
-          <button
-            onClick={() => setShowExplanation(!showExplanation)}
-            className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-gray-50 transition-colors border border-gray-200"
-            title={showExplanation ? "Hide Explanation" : "Show Explanation"}
-          >
-            <Info className="w-5 h-5" />
-          </button>
         </div>
-
-        {showExplanation && activeDiagramInfo && (
-          <ExplanationPanel
-            diagram={activeDiagramInfo}
-            onClose={() => setShowExplanation(false)}
-          />
-        )}
       </div>
     </div>
   );
