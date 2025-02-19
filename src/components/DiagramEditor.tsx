@@ -276,7 +276,6 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
     let maxX = -Infinity;
     let maxY = -Infinity;
 
-    // Check shapes
     shapes.forEach(shape => {
       const width = shape.width || (shape.type === 'text' ? 200 : 128);
       const height = shape.height || (shape.type === 'text' ? 100 : shape.type === 'rectangle' ? 80 : 128);
@@ -286,7 +285,6 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
       maxX = Math.max(maxX, shape.position.x + width);
       maxY = Math.max(maxY, shape.position.y + height);
 
-      // For lines, check endPoint
       if (shape.type === 'line' && shape.endPoint) {
         minX = Math.min(minX, shape.endPoint.x);
         minY = Math.min(minY, shape.endPoint.y);
@@ -295,7 +293,6 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
       }
     });
 
-    // Check drawings
     drawings.forEach(drawing => {
       drawing.points.forEach(point => {
         minX = Math.min(minX, point.x);
@@ -305,7 +302,6 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
       });
     });
 
-    // Add padding
     const padding = 50;
     return {
       x: Math.max(0, minX - padding),
@@ -321,12 +317,10 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
     try {
       const boundingBox = calculateBoundingBox();
       
-      // Create a temporary container for export
       const exportContainer = containerRef.current.cloneNode(true) as HTMLElement;
       const toolbar = exportContainer.querySelector('[class*="absolute top-4 left-4"]');
       if (toolbar) toolbar.remove();
 
-      // Position the container to show only the diagram area
       exportContainer.style.backgroundColor = backgroundColor;
       exportContainer.style.width = `${boundingBox.width}px`;
       exportContainer.style.height = `${boundingBox.height}px`;
@@ -615,23 +609,42 @@ const DiagramEditor: React.FC<DiagramEditorProps> = ({
   };
 
   const handleClearScreen = () => {
+    const oldState = {
+      shapes,
+      connections,
+      drawings,
+      currentDiagramId,
+      shareUrl,
+      isPublic
+    };
+
     setShapes([]);
     setConnections([]);
     setDrawings([]);
     setSelectedShape(null);
     setSelectedConnection(null);
+    setCurrentDiagramId(null);
+    setShareUrl('');
+    setIsPublic(false);
+    
     addToHistory({
       type: 'CLEAR_SCREEN',
-      data: { shapes, connections, drawings },
+      data: oldState,
       undo: () => {
-        setShapes(shapes);
-        setConnections(connections);
-        setDrawings(drawings);
+        setShapes(oldState.shapes);
+        setConnections(oldState.connections);
+        setDrawings(oldState.drawings);
+        setCurrentDiagramId(oldState.currentDiagramId);
+        setShareUrl(oldState.shareUrl);
+        setIsPublic(oldState.isPublic);
       },
       redo: () => {
         setShapes([]);
         setConnections([]);
         setDrawings([]);
+        setCurrentDiagramId(null);
+        setShareUrl('');
+        setIsPublic(false);
       }
     });
   };
