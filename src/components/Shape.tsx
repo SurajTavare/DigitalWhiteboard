@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Shape as ShapeType } from '../types';
-import { Minus, Plus, Type, AlignLeft, AlignCenter, AlignRight, Bold, Italic, RotateCcw, RotateCw } from 'lucide-react';
+import { Minus, Plus, Type, AlignLeft, AlignCenter, AlignRight, Bold, Italic } from 'lucide-react';
 
 interface ShapeProps {
   shape: ShapeType;
@@ -52,7 +52,6 @@ const Shape: React.FC<ShapeProps> = ({
     width: shape.width || (shape.type === 'text' ? 200 : 128),
     height: shape.height || (shape.type === 'text' ? 100 : shape.type === 'rectangle' ? 80 : 128)
   });
-  const [rotation, setRotation] = useState(0);
   const resizeRef = useRef<HTMLDivElement>(null);
   const initialSize = useRef({ width: 0, height: 0 });
   const initialMousePos = useRef({ x: 0, y: 0 });
@@ -197,11 +196,6 @@ const Shape: React.FC<ShapeProps> = ({
     }
   };
 
-  const handleRotate = (direction: 'left' | 'right') => {
-    const change = direction === 'left' ? -15 : 15;
-    setRotation((prev) => prev + change);
-  };
-
   const handleControlPointDrag = (pointType: 'cp1' | 'cp2', position: Point) => {
     if (shape.type === 'line') {
       const updatedShape = { ...shape };
@@ -303,7 +297,6 @@ const Shape: React.FC<ShapeProps> = ({
         style={{
           width: size.width,
           height: size.height,
-          transform: `rotate(${rotation}deg)`,
           ...(shape.type !== 'text' ? {
             borderColor: shape.borderColor || '#666',
             borderWidth: shape.borderWidth || 2,
@@ -348,27 +341,6 @@ const Shape: React.FC<ShapeProps> = ({
                 <Plus className="w-4 h-4" />
               </button>
             </div>
-            <div className="h-4 w-px bg-gray-200" />
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRotate('left');
-              }}
-              className="p-1.5 hover:bg-gray-100 rounded-lg transition-all"
-              title="Rotate Left"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRotate('right');
-              }}
-              className="p-1.5 hover:bg-gray-100 rounded-lg transition-all"
-              title="Rotate Right"
-            >
-              <RotateCw className="w-4 h-4" />
-            </button>
             {showColorPicker && (
               <div className="absolute top-10 left-0 bg-white/90 backdrop-blur-sm shadow-lg rounded-lg p-2 z-10 border border-gray-200">
                 <div className="grid grid-cols-5 gap-1">
