@@ -47,7 +47,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
   const handleCopy = async () => {
     try {
       // Use window.location.origin if available (in browser)
-      const baseUrl = typeof window !== "undefined" && window.location.origin
+      const baseUrl =  window.location.origin
         ? window.location.origin.replace(/\/$/, '') // Remove trailing slash
         : "https://digital-whiteboard-lake.vercel.app/"; // Fallback to Vercel URL if not in the browser
     
