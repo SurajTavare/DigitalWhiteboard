@@ -47,23 +47,30 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
   const handleCopy = async () => {
     try {
       // Use window.location.origin if available (in browser)
-      const baseUrl =  window.location.origin
+      const baseUrl = typeof window !== "undefined" && window.location.origin
         ? window.location.origin.replace(/\/$/, '') // Remove trailing slash
         : "https://digital-whiteboard-lake.vercel.app/"; // Fallback to Vercel URL if not in the browser
-    
+      
       const shareId = shareUrl.split('/').pop();
       const urlToShare = shareMode === 'collaborate'
         ? `${baseUrl}/collaborate/${shareId}`
         : `${baseUrl}/view/${shareId}`;
-    
+      
       // Copy the generated URL to the clipboard
-      await navigator.clipboard.writeText(urlToShare);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(urlToShare);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        throw new Error("Clipboard API not supported.");
+      }
     } catch (err) {
       console.error('Failed to copy:', err);
+      // Optional: Provide feedback to the user if clipboard fails
+      alert("Failed to copy link. Please try again.");
     }
   };
+  
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
