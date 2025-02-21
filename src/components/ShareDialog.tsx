@@ -46,12 +46,17 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
 
   const handleCopy = async () => {
     try {
-      const baseUrl = window.location.origin.replace(/\/$/, '');
+      // Use window.location.origin if available (in browser)
+      const baseUrl = typeof window !== "undefined" && window.location.origin
+        ? window.location.origin.replace(/\/$/, '') // Remove trailing slash
+        : "https://digital-whiteboard-lake.vercel.app/"; // Fallback to Vercel URL if not in the browser
+    
       const shareId = shareUrl.split('/').pop();
-      const urlToShare = shareMode === 'collaborate' 
+      const urlToShare = shareMode === 'collaborate'
         ? `${baseUrl}/collaborate/${shareId}`
         : `${baseUrl}/view/${shareId}`;
-      
+    
+      // Copy the generated URL to the clipboard
       await navigator.clipboard.writeText(urlToShare);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
