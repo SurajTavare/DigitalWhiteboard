@@ -8,6 +8,7 @@ export function getBaseUrl(): string {
     // First, check for Vercel environment variables
     if (import.meta.env.VITE_VERCEL_URL) {
       return `https://${import.meta.env.VITE_VERCEL_URL}`;
+      console.log(import.meta.env.VITE_VERCEL_URL);
     }
   
     // For preview deployments and local development
