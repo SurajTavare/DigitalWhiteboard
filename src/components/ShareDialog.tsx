@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Copy, X, Eye, Users, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { getBaseUrl, getShareUrl } from '../lib/utils';
 
 interface ShareDialogProps {
   shareUrl: string;
@@ -30,15 +31,14 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-      setShowAuthForm(!session); // Show auth form if user is not authenticated
+      setShowAuthForm(!session);
     };
 
     checkAuth();
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      setShowAuthForm(!session); // Hide auth form if user is authenticated
+      setShowAuthForm(!session);
     });
 
     return () => subscription.unsubscribe();
@@ -46,12 +46,10 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
 
   const handleCopy = async () => {
     try {
-      const baseUrl = window.location.origin.replace(/\/$/, '');
       const shareId = shareUrl.split('/').pop();
-      const urlToShare = shareMode === 'collaborate' 
-        ? `${baseUrl}/collaborate/${shareId}`
-        : `${baseUrl}/view/${shareId}`;
+      if (!shareId) throw new Error('Invalid share URL');
       
+      const urlToShare = getShareUrl(shareId, shareMode);
       await navigator.clipboard.writeText(urlToShare);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -76,8 +74,8 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
       
       setSuccess('Successfully signed in!');
       setTimeout(() => {
-        setShowAuthForm(false); // Hide auth form after successful sign-in
-        onTogglePublic(true); // Automatically make the diagram public after sign-in
+        setShowAuthForm(false);
+        onTogglePublic(true);
       }, 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign in');
@@ -97,7 +95,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: getBaseUrl(),
         },
       });
 
@@ -112,8 +110,8 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
 
       setSuccess('Account created and signed in successfully!');
       setTimeout(() => {
-        setShowAuthForm(false); // Hide auth form after successful sign-up
-        onTogglePublic(true); // Automatically make the diagram public after sign-up
+        setShowAuthForm(false);
+        onTogglePublic(true);
       }, 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign up');
@@ -124,10 +122,9 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    setUser(null); // Clear user state
+    setUser(null);
   };
 
-  // Show authentication form if user is not authenticated
   if (!user || showAuthForm) {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -209,7 +206,6 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
     );
   }
 
-  // Show sharing options and user info if user is authenticated
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -270,7 +266,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={shareMode === 'collaborate' ? shareUrl.replace('/view/', '/collaborate/') : shareUrl}
+                  value={getShareUrl(shareUrl.split('/').pop() || '', shareMode)}
                   readOnly
                   className="flex-1 px-3 py-2 border rounded-lg bg-gray-50"
                 />
