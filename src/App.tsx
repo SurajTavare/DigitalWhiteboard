@@ -18,14 +18,12 @@ function App() {
         const mode = pathParts[0]; // 'view' or 'collaborate'
         const shareId = pathParts[1];
 
-        console.log('Loading diagram with shareId:', shareId);
-
         if (!shareId) {
           setLoading(false);
           return;
         }
 
-        // Fetch the diagram data
+        // Fetch the diagram data using share_id
         const { data: diagram, error } = await supabase
           .from('diagrams')
           .select('*')
@@ -33,13 +31,13 @@ function App() {
           .single();
 
         if (error) {
-          console.error('Supabase error:', error);
+          if (error.code === 'PGRST116') {
+            throw new Error('Diagram not found');
+          }
           throw error;
         }
 
         if (diagram) {
-          console.log('Loaded diagram:', diagram);
-          
           // Ensure data structure is complete
           const diagramData = {
             id: diagram.id,
@@ -54,12 +52,11 @@ function App() {
 
           setDiagramData(diagramData);
         } else {
-          console.error('No diagram found for shareId:', shareId);
-          setError('Diagram not found');
+          throw new Error('Diagram not found');
         }
       } catch (err) {
         console.error('Error loading diagram:', err);
-        setError('Failed to load diagram');
+        setError(err instanceof Error ? err.message : 'Failed to load diagram');
       } finally {
         setLoading(false);
       }
@@ -113,12 +110,10 @@ function App() {
   }
 
   if (isViewOnly && diagramData) {
-    console.log('Rendering view-only diagram:', diagramData);
     return <ViewOnlyDiagram {...diagramData} />;
   }
 
   if (isCollabMode && diagramData) {
-    console.log('Rendering collaborative diagram:', diagramData);
     return <DiagramEditor initialData={diagramData} isCollaborating={true} />;
   }
 
