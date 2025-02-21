@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Copy, X, Eye, Users, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { getBaseUrl, getShareUrl } from '../lib/utils';
 
 interface ShareDialogProps {
   shareUrl: string;
@@ -31,14 +30,15 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-      setShowAuthForm(!session);
+      setShowAuthForm(!session); // Show auth form if user is not authenticated
     };
 
     checkAuth();
 
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      setShowAuthForm(!session);
+      setShowAuthForm(!session); // Hide auth form if user is authenticated
     });
 
     return () => subscription.unsubscribe();
@@ -46,10 +46,15 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
 
   const handleCopy = async () => {
     try {
+      // Get the share ID from the original URL
       const shareId = shareUrl.split('/').pop();
-      if (!shareId) throw new Error('Invalid share URL');
       
-      const urlToShare = getShareUrl(shareId, shareMode);
+      // Construct the full URL using the current hostname
+      const baseUrl = window.location.href.split('/').slice(0, 3).join('/');
+      const urlToShare = shareMode === 'collaborate' 
+        ? `${baseUrl}/collaborate/${shareId}`
+        : `${baseUrl}/view/${shareId}`;
+      
       await navigator.clipboard.writeText(urlToShare);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -74,8 +79,8 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
       
       setSuccess('Successfully signed in!');
       setTimeout(() => {
-        setShowAuthForm(false);
-        onTogglePublic(true);
+        setShowAuthForm(false); // Hide auth form after successful sign-in
+        onTogglePublic(true); // Automatically make the diagram public after sign-in
       }, 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign in');
@@ -95,7 +100,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
         email,
         password,
         options: {
-          emailRedirectTo: getBaseUrl(),
+          emailRedirectTo: window.location.href,
         },
       });
 
@@ -110,8 +115,8 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
 
       setSuccess('Account created and signed in successfully!');
       setTimeout(() => {
-        setShowAuthForm(false);
-        onTogglePublic(true);
+        setShowAuthForm(false); // Hide auth form after successful sign-up
+        onTogglePublic(true); // Automatically make the diagram public after sign-up
       }, 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign up');
@@ -122,9 +127,10 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
+    setUser(null); // Clear user state
   };
 
+  // Show authentication form if user is not authenticated
   if (!user || showAuthForm) {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -206,6 +212,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
     );
   }
 
+  // Show sharing options and user info if user is authenticated
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -266,7 +273,13 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={getShareUrl(shareUrl.split('/').pop() || '', shareMode)}
+                  value={(() => {
+                    const shareId = shareUrl.split('/').pop();
+                    const baseUrl = window.location.href.split('/').slice(0, 3).join('/');
+                    return shareMode === 'collaborate' 
+                      ? `${baseUrl}/collaborate/${shareId}`
+                      : `${baseUrl}/view/${shareId}`;
+                  })()}
                   readOnly
                   className="flex-1 px-3 py-2 border rounded-lg bg-gray-50"
                 />
