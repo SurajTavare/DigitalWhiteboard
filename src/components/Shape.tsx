@@ -3,6 +3,7 @@ import Draggable from 'react-draggable';
 import { Shape as ShapeType } from '../types';
 import { Minus, Plus, Type, AlignLeft, AlignCenter, AlignRight, Bold, Italic } from 'lucide-react';
 
+let a;
 interface ShapeProps {
   shape: ShapeType;
   onDrag: (id: string, position: { x: number; y: number }, isEndPoint?: boolean, updatedShape?: any) => void;
