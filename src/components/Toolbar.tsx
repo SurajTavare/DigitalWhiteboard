@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Square, Circle, Diamond, Link as Line, Trash2, Pen, Download, Type, Eraser, PaintBucket, X, FileText, Sparkles, Code, HelpCircle, Trash } from 'lucide-react';
+import {   Square,   Circle,   Diamond,    Trash2,   Pen,   Download,   Type,   Eraser,   PaintBucket,   X,  FileText,  Sparkles,  Code,  HelpCircle,   Trash } from 'lucide-react';
 import FileViewer from './FileViewer';
 // import DiagramSuggestions from './DiagramSuggestions';
 import CodeToDiagram from './CodeToDiagram';
+import AIMermaidGenerator from './AIMermaidGenerator';
 import { DiagramSuggestion } from '../types';
 
 interface ToolbarProps {
@@ -41,6 +42,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showCodeHints, setShowCodeHints] = useState(false);
   const [showCodeEditor, setShowCodeEditor] = useState(false);
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -110,14 +112,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
     <>
       <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg z-20 border border-gray-200">
         <div className="p-3 space-y-2">
-          {/* <button
-            onClick={() => setShowSuggestions(true)}
+          <button
+            onClick={() => setShowAIGenerator(true)}
             className="w-full p-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity mb-2"
-            title="Get AI Suggestions"
+            title="Generate PlantUML with AI"
           >
             <Sparkles className="w-5 h-5" />
-            <span className="text-sm">AI Suggest</span>
-          </button> */}
+            <span className="text-sm">AI Diagram</span>
+          </button>
 
           <div className="grid grid-cols-2 gap-2 p-1 bg-gray-50 rounded-lg mb-2">
             <button 
@@ -184,14 +186,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
               <Type className="w-5 h-5" />
               <span className="text-sm">Text</span>
             </button>
-            <button 
+            {/* <button 
               onClick={handleStartConnectionWithTip} 
               className={`w-full p-2 hover:bg-gray-50 rounded-lg flex items-center gap-2 transition-all ${isConnecting ? 'bg-blue-50 text-blue-600' : ''}`} 
               title="Connect Shapes - Click two shapes to connect them"
             >
               <Line className="w-5 h-5" />
               <span className="text-sm">Connect</span>
-            </button>
+            </button> */}
             <button 
               onClick={handleStartDrawingWithTip} 
               className={`w-full p-2 hover:bg-gray-50 rounded-lg flex items-center gap-2 transition-all ${isDrawing ? 'bg-blue-50 text-blue-600' : ''}`} 
@@ -294,7 +296,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Mermaid.js Code Hints</h2>
+              <h2 className="text-xl font-semibold">PlantUML Code Hints</h2>
               <button
                 onClick={() => setShowCodeHints(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
@@ -305,52 +307,53 @@ const Toolbar: React.FC<ToolbarProps> = ({
             
             <div className="space-y-4 overflow-y-auto custom-scrollbar">
               <div>
-                <h3 className="font-medium mb-2">*Flowchart</h3>
+                <h3 className="font-medium mb-2">*Sequence Diagram</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
-                  {`graph TD
-    A[Start] --> B{Is it?}
-    B -->|Yes| C[OK]
-    C --> D[Rethink]
-    D --> B
-    B ---->|No| E[End]`}
+                  {`@startuml
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: Another authentication Response
+@enduml`}
                 </pre>
                 <br></br>
                 <br></br>
                 <pre>
                 {`explanation:-
-• TD indicates Top-Down direction
-• A[Start] creates a node with text "Start"
-• --> creates an arrow connection
-• {Decision?} creates a diamond shape
-• |Yes| adds text to the arrow`}
+• @startuml and @enduml mark the beginning and end
+• -> creates a solid arrow
+• --> creates a dashed arrow
+• : adds message text`}
                 </pre>
               </div>
               <br></br>
               <br></br>
               <br></br>
               <div>
-                <h3 className="font-medium mb-2">*Sequence Diagram</h3>
+                <h3 className="font-medium mb-2">*Use Case Diagram</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
-                  {`sequenceDiagram
-    participant Alice
-    participant Bob
-    Alice->>John: Hello John, how are you?
-    loop Healthcheck
-        John->>John: Fight against hypochondria
-    end
-    Note right of John: Rational thoughts!
-    John-->>Alice: Great!
-    John->>Bob: How about you?
-    Bob-->>John: Jolly good!`}
+                  {`@startuml
+left to right direction
+actor Customer
+actor Clerk
+rectangle Checkout {
+  Customer -- (Checkout)
+  (Checkout) .> (Payment) : include
+  (Help) .> (Checkout) : extends
+  (Checkout) -- Clerk
+}
+@enduml`}
                 </pre>
                 <br></br>
                 <br></br>
                 <pre>
                 {`explanation: 
-• participant defines an actor
-• ->> creates a solid arrow
-• -->> creates a dashed arrow
-• : adds message text`
+• actor defines a person/system
+• rectangle creates a boundary
+• -- creates a solid line connection
+• .> creates a dashed arrow
+• : include/extends shows relationships`
     }
                 </pre>
               </div>
@@ -362,19 +365,28 @@ const Toolbar: React.FC<ToolbarProps> = ({
               <div>
                 <h3 className="font-medium mb-2">*Class Diagram</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
-                  {`classDiagram
-    Animal <|-- Duck
-    Animal <|-- Fish
-    Animal <|-- Zebra
-    Animal : +int age
-    Animal : +String gender
-    Animal: +isMammal()
-    Animal: +mate()
-    class Duck{
-      +String beakColor
-      +swim()
-      +quack()
-    }`}
+                  {`@startuml
+class Animal {
+  +int age
+  +String gender
+  +isMammal()
+  +mate()
+}
+
+class Duck {
+  +String beakColor
+  +swim()
+  +quack()
+}
+
+class Fish {
+  -int sizeInFeet
+  -canEat()
+}
+
+Animal <|-- Duck
+Animal <|-- Fish
+@enduml`}
                 </pre>
                 <br></br>
                 <br></br>
@@ -382,8 +394,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
                 {`explanation: 
 • class defines a new class
 • + indicates public members
-• <|-- shows inheritance
-• () indicates methods`}
+• - indicates private members
+• <|-- shows inheritance`}
                 </pre>
               </div>
               <br></br>
@@ -391,86 +403,98 @@ const Toolbar: React.FC<ToolbarProps> = ({
               <br></br>
 
               <div>
-                <h3 className="font-medium mb-2">*Entity Relationship Diagram</h3>
+                <h3 className="font-medium mb-2">*Activity Diagram</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
-                  {`erDiagram
-    CUSTOMER ||--o{ ORDER : places
-    ORDER ||--|{ LINE-ITEM : contains
-    CUSTOMER }|..|{ DELIVERY-ADDRESS : uses`}
+                  {`@startuml
+start
+:Initialize Process;
+if (Data Available?) then (yes)
+  :Process Data;
+  if (Is Valid?) then (yes)
+    :Save Results;
+  else (no)
+    :Log Error;
+  endif
+else (no)
+  :Wait for Data;
+endif
+:Cleanup;
+stop
+@enduml`}
                 </pre>
                 <br></br>
                 <br></br>
                 <pre>
                   {`explanation: 
-• ||--o{ shows one-to-many relationship
-• ||--|| shows one-to-one relationship
-• }|--|{ shows many-to-many
-• : adds relationship label`}
+• start/stop mark beginning and end
+• : defines an activity
+• if/else/endif create decision points
+• (label) adds text to branches`}
                 </pre>
               </div>
               <br></br>
               <br></br>
               <br></br>
+
+              <div>
+                <h3 className="font-medium mb-2">*Component Diagram</h3>
+                <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
+                  {`@startuml
+package "Frontend" {
+  [Web UI]
+  [Mobile App]
+}
+
+package "Backend" {
+  [API Gateway]
+  [User Service]
+  [Payment Service]
+  database "User DB"
+  database "Payment DB"
+}
+
+[Web UI] --> [API Gateway]
+[Mobile App] --> [API Gateway]
+[API Gateway] --> [User Service]
+[API Gateway] --> [Payment Service]
+[User Service] --> [User DB]
+[Payment Service] --> [Payment DB]
+@enduml`}
+                </pre>
+                <br></br>
+                <br></br>
+                <pre>
+                  {`explanation: 
+• package groups related components
+• [Component] defines a component
+• database defines a database
+• --> creates connections between components`}
+                </pre>
+              </div>
+                    <br></br>
+                    <br></br>
+                    <br></br>
 
               <div>
                 <h3 className="font-medium mb-2">*State Diagram</h3>
                 <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
-                  {`stateDiagram-v2
-    [*] --> Still
-    Still --> [*]
-    Still --> Moving
-    Moving --> Still
-    Moving --> Crash
-    Crash --> [*]`}
-                </pre>
-                <br></br>
-                <br></br>
-                <pre>
-                  {` explanation: 
-• [*] represents start/end state
-• --> creates transitions
-• : adds transition label`}
-                </pre>
-              </div>
-                    <br></br>
-                    <br></br>
-                    <br></br>
-
-              <div>
-                <h3 className="font-medium mb-2">*Gantt Chart</h3>
-                <pre className="bg-gray-50 p-3 rounded-lg text-sm overflow-x-auto">
-                  {` gantt
-    title Project Schedule
-    dateFormat YYYY-MM-DD
-    
-    section Planning
-    Requirements    :a1, 2024-03-01, 7d
-    Design         :after a1, 10d
-    
-    section Development
-    Frontend       :2024-03-15, 14d
-    Backend        :2024-03-20, 10d
-    
-    section Testing
-    Integration    :2024-04-01, 7d
-    User Testing   :2024-04-08, 5d
-    
-    section Deployment
-    Release        :milestone, 2024-04-15, 1d`}
+                  {`@startuml
+[*] --> Idle
+Idle --> Processing : Start
+Processing --> Completed : Success
+Processing --> Failed : Error
+Completed --> [*]
+Failed --> Idle : Retry
+@enduml`}
                 </pre>
                 <br></br>
                 <br></br>
                 <pre>
                   {`explanation: 
-• dateFormat sets the date display format
-• section groups related tasks
-• task :id, start_date, duration
-• after taskId sets dependency
-• duration format: Nd (N days)
-• milestone marks important points
-• title sets chart title
-• Supports parallel tasks
-• Can use dates or dependencies`}
+• [*] represents start/end state
+• --> creates transitions
+• : adds transition label
+• States can have internal actions using : notation`}
                 </pre>
               </div>
             </div>
@@ -481,6 +505,12 @@ const Toolbar: React.FC<ToolbarProps> = ({
       {showCodeEditor && (
         <CodeToDiagram
           onClose={() => setShowCodeEditor(false)}
+        />
+      )}
+
+      {showAIGenerator && (
+        <AIMermaidGenerator
+          onClose={() => setShowAIGenerator(false)}
         />
       )}
     </>
