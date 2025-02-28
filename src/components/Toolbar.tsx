@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {   Square,   Circle,   Diamond,    Trash2,   Pen,   Download,   Type,   Eraser,   PaintBucket,   X,  FileText,  Sparkles,  Code,  HelpCircle,   Trash } from 'lucide-react';
+import {   Square,   Circle,   Diamond,   Link as Line, Trash2,   Pen,   Download,   Type,   Eraser,   PaintBucket,   X,  FileText,  Sparkles,  Code,  HelpCircle,   Trash } from 'lucide-react';
 import FileViewer from './FileViewer';
 // import DiagramSuggestions from './DiagramSuggestions';
 import CodeToDiagram from './CodeToDiagram';
@@ -186,14 +186,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
               <Type className="w-5 h-5" />
               <span className="text-sm">Text</span>
             </button>
-            {/* <button 
+            <button 
               onClick={handleStartConnectionWithTip} 
               className={`w-full p-2 hover:bg-gray-50 rounded-lg flex items-center gap-2 transition-all ${isConnecting ? 'bg-blue-50 text-blue-600' : ''}`} 
               title="Connect Shapes - Click two shapes to connect them"
             >
               <Line className="w-5 h-5" />
               <span className="text-sm">Connect</span>
-            </button> */}
+            </button>
             <button 
               onClick={handleStartDrawingWithTip} 
               className={`w-full p-2 hover:bg-gray-50 rounded-lg flex items-center gap-2 transition-all ${isDrawing ? 'bg-blue-50 text-blue-600' : ''}`} 
