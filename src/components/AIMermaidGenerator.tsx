@@ -36,7 +36,7 @@ const AIPlantUMLGenerator: React.FC<AIPlantUMLGeneratorProps> = ({ onClose, apiK
       }
 
       const genAI = new GoogleGenerativeAI(effectiveApiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
       const systemPrompt = "You are a diagram expert specializing in PlantUML syntax. Generate valid, well-structured PlantUML code based on user requests. Only respond with the code, no explanations or markdown formatting.";
       
